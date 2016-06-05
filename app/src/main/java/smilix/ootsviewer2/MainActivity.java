@@ -1,13 +1,16 @@
 package smilix.ootsviewer2;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FullscreenFragmentActivity {
 
 
     private static final String TAG = MainActivity.class.toString();
@@ -17,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView mWebView;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,12 +29,16 @@ public class MainActivity extends AppCompatActivity {
         // https://developer.chrome.com/multidevice/webview/gettingstarted
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
-        // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setSupportZoom(true);
-
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return MainActivity.this.onTouchEvent(event);
+            }
+        });
         // Force links and redirects to open in the WebView instead of in a browser
         mWebView.setWebViewClient(new RestrictedWebViewClient(new RestrictedWebViewClient.OnNewUrlCallback() {
             @Override
