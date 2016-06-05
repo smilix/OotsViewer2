@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setSupportZoom(true);
 
         // Force links and redirects to open in the WebView instead of in a browser
         mWebView.setWebViewClient(new RestrictedWebViewClient(new RestrictedWebViewClient.OnNewUrlCallback() {
