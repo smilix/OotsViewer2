@@ -1,0 +1,31 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="page.css">
+  <script src="ctrl.js"></script>
+</head>
+<body class="dark">
+<div class="control">
+  <a href="#" onclick="prevImage()" class="btn">⇦ Prev</a>
+  <a href="#" onclick="nextImage()" class="btn">Next ⇨</a>
+  <span class="spacer"></span>
+  <form onsubmit="loadPage(); return false">
+  <input type="number" id="page">
+  <a href="#" onclick="loadPage()" class="btn">Load</a>
+  </form>
+  <span class="spacer"></span>
+  <span class="minor">
+    <a href="#" onclick="toggleLogbox()" class="btn btn-sm">L</a>
+    <a href="#" onclick="toggleBgColor()" class="btn btn-sm">C</a>
+  </span>
+
+</div>
+
+<div id="logBox">
+  The log file:
+  <pre id="log"></pre>
+</div>
+
+<img id="image"/>
+
+</body>
+</html>

@@ -38,7 +38,6 @@ public class FullscreenFragmentActivity extends FragmentActivity implements Gest
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +80,10 @@ public class FullscreenFragmentActivity extends FragmentActivity implements Gest
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
+        if ((getWindow().getDecorView().getSystemUiVisibility() & View.SYSTEM_UI_FLAG_FULLSCREEN) != View.SYSTEM_UI_FLAG_FULLSCREEN) {
+            hideSystemUI();
+            return true;
+        }
         return false;
     }
 

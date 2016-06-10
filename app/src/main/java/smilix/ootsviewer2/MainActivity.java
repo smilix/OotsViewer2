@@ -2,23 +2,19 @@ package smilix.ootsviewer2;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 public class MainActivity extends FullscreenFragmentActivity {
-
-
     private static final String TAG = MainActivity.class.toString();
 
-    private static final String LAST_URL = "lastUrl";
+    private static final String CURRENT_STRIP = "currentStrip";
     private static final String PREFS_NAME = "settings";
-
-    private WebView mWebView;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -28,7 +24,7 @@ public class MainActivity extends FullscreenFragmentActivity {
 
         // https://developer.chrome.com/multidevice/webview/gettingstarted
 
-        mWebView = (WebView) findViewById(R.id.activity_main_webview);
+        WebView mWebView = (WebView) findViewById(R.id.activity_main_webview);
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setBuiltInZoomControls(true);
@@ -39,30 +35,26 @@ public class MainActivity extends FullscreenFragmentActivity {
                 return MainActivity.this.onTouchEvent(event);
             }
         });
-        // Force links and redirects to open in the WebView instead of in a browser
-        mWebView.setWebViewClient(new RestrictedWebViewClient(new RestrictedWebViewClient.OnNewUrlCallback() {
+
+        int number = loadStripNumber();
+
+        new AppCtrl(mWebView, number, new AppCtrl.AppCtrlCallbacks() {
             @Override
-            public void onNewUrl(String url) {
-                saveUrl(url);
+            public void onNewNumber(int number) {
+                saveStripNumber(number);
             }
-        }, "www.giantitp.com"));
-
-
-        String lastUrl = loadUrl();
-        mWebView.loadUrl(lastUrl);
+        });
     }
 
-    private void saveUrl(String url) {
+    private void saveStripNumber(int number) {
         SharedPreferences settings = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(LAST_URL, url);
+        editor.putInt(CURRENT_STRIP, number);
         editor.apply();
     }
 
-    private String loadUrl() {
+    private int loadStripNumber() {
         SharedPreferences settings = getApplicationContext().getSharedPreferences(PREFS_NAME, 0);
-        String url = settings.getString(LAST_URL, "http://www.giantitp.com/comics/oots.html");
-        Log.d(TAG, "loaded strip settings: " + url);
-        return url;
+        return settings.getInt(CURRENT_STRIP, 1);
     }
 }
