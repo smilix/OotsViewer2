@@ -28,6 +28,7 @@ public class MainActivity extends FullscreenFragmentActivity {
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false);
         webSettings.setSupportZoom(true);
         mWebView.setOnTouchListener(new View.OnTouchListener() {
             @Override

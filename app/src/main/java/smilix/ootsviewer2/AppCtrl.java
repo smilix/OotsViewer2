@@ -62,6 +62,11 @@ public class AppCtrl implements OotsUrlResolver.UrlResult {
         loadStrip();
     }
 
+    @JavascriptInterface
+    public String getVersion() {
+        return String.format("%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
+    }
+
 
     @Override
     public void onOotsUrlResolved(String imageUrl) {

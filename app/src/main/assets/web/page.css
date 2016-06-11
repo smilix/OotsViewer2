@@ -5,9 +5,11 @@ body.dark {
 .control {
   text-align: center;
 }
+
 .control .btn {
   margin-left: 5px;
 }
+
 .control form {
   display: inline;
 }
@@ -33,12 +35,22 @@ body.dark {
   display: none;
   font-size: 16px;
 }
+
 .dark #logBox {
   color: white;
 }
 
 #log {
   margin: 2px 0;
+}
+
+#version {
+  font-size: 12px;
+  text-align: right;
+}
+
+.dark #version {
+  color: white;
 }
 
 .btn {
@@ -75,7 +87,6 @@ body.dark {
   position: relative;
   top: 1px;
 }
-
 
 .btn.btn-sm {
   font-size: 14px;

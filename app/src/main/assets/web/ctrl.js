@@ -61,7 +61,9 @@ function updatePageNumber(number) {
 }
 
 window.onload = function () {
-  log('loaded!');
+  var version = AppCtrl.getVersion();
+  log('loaded ' + version);
+  document.getElementById('version').innerHTML = version;
   showImage('sunny.gif');
   AppCtrl.domReady();
 };
