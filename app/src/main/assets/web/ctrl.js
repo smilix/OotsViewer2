@@ -44,6 +44,10 @@ function toggleBgColor() {
   dark = !dark;
 }
 
+function scrollToTop() {
+  window.scrollTo(0, 0);
+}
+
 function showError(type) {
   if (!logboxActive) {
     toggleLogbox();
