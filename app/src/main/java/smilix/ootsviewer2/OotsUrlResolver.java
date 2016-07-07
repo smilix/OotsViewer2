@@ -40,17 +40,31 @@ public class OotsUrlResolver {
     public void getImageUrl(int comicNumber) {
         if (this.imageUrlCache.containsKey(comicNumber)) {
             this.callback.onOotsUrlResolved(this.imageUrlCache.get(comicNumber));
-            return;
+        } else {
+            new DownloadWebPageTask().execute(new DownloadOptions(comicNumber, false));
         }
-        new DownloadWebPageTask().execute(comicNumber);
+        // prefetch the next comic
+        int nextComicNumber = comicNumber + 1;
+        if (!this.imageUrlCache.containsKey(nextComicNumber)) {
+            new DownloadWebPageTask().execute(new DownloadOptions(nextComicNumber, true));
+        }
     }
 
+    class DownloadOptions {
+        int number;
+        boolean prefetchOnly;
 
-    class DownloadWebPageTask extends AsyncTask<Integer, Void, AsyncTaskResult<Pair<Integer, String>>> {
+        DownloadOptions(int number, boolean prefetchOnly) {
+            this.number = number;
+            this.prefetchOnly = prefetchOnly;
+        }
+    }
+
+    class DownloadWebPageTask extends AsyncTask<DownloadOptions, Void, AsyncTaskResult<Pair<DownloadOptions, String>>> {
         @Override
-        protected AsyncTaskResult<Pair<Integer, String>> doInBackground(Integer... number) {
+        protected AsyncTaskResult<Pair<DownloadOptions, String>> doInBackground(DownloadOptions... options) {
 
-            final String htmlUrl = String.format("http://www.giantitp.com/comics/oots%04d.html", number[0]);
+            final String htmlUrl = String.format("http://www.giantitp.com/comics/oots%04d.html", options[0].number);
             try {
                 URL url = new URL(htmlUrl);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -63,7 +77,7 @@ public class OotsUrlResolver {
                     while ((s = buffer.readLine()) != null) {
                         content.append(s);
                     }
-                    return new AsyncTaskResult<>(Pair.create(number[0], content.toString()));
+                    return new AsyncTaskResult<>(Pair.create(options[0], content.toString()));
                 } finally {
                     urlConnection.disconnect();
                 }
@@ -73,8 +87,9 @@ public class OotsUrlResolver {
         }
 
         @Override
-        protected void onPostExecute(AsyncTaskResult<Pair<Integer, String>> result) {
-            Integer comicNumber = result.getResult().first;
+        protected void onPostExecute(AsyncTaskResult<Pair<DownloadOptions, String>> result) {
+            DownloadOptions options = result.getResult().first;
+            int comicNumber = options.number;
             if (result.getError() != null) {
                 callback.onOotsUrlError("Can't load page for comic strip: " + comicNumber);
             } else {
@@ -83,7 +98,9 @@ public class OotsUrlResolver {
                     String imageName = matcher.group(1);
                     String imageUrl = "http://www.giantitp.com/comics/images/" + imageName;
                     imageUrlCache.put(comicNumber, imageUrl);
-                    callback.onOotsUrlResolved(imageUrl);
+                    if (!options.prefetchOnly) {
+                        callback.onOotsUrlResolved(imageUrl);
+                    }
                 } else {
                     callback.onOotsUrlError("Can't find image in html.");
                 }
