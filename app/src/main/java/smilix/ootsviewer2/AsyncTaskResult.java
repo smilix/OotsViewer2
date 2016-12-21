@@ -15,6 +15,10 @@ public class AsyncTaskResult<T> {
         return error;
     }
 
+    public boolean hasError() {
+        return this.error != null;
+    }
+
     public AsyncTaskResult(T result) {
         super();
         this.result = result;

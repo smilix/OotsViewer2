@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,23 +20,13 @@ import java.util.regex.Pattern;
  * Created by holger on 11.06.16.
  */
 public class OotsUrlResolver {
-    public interface UrlResult {
-        void onOotsUrlResolved(String imageUrl);
-
-        void onOotsUrlError(String reason);
-    }
-
-
     private static final Pattern IMAGE_URL_PATTERN =
             Pattern.compile("<img src=\"\\/comics\\/images\\/([\\w\\.]+)\">", Pattern.CASE_INSENSITIVE);
-
     private UrlResult callback;
     private Map<Integer, String> imageUrlCache = new HashMap<>();
-
     public OotsUrlResolver(UrlResult callback) {
         this.callback = callback;
     }
-
 
     public void getImageUrl(int comicNumber) {
         if (this.imageUrlCache.containsKey(comicNumber)) {
@@ -48,6 +39,13 @@ public class OotsUrlResolver {
         if (!this.imageUrlCache.containsKey(nextComicNumber)) {
             new DownloadWebPageTask().execute(new DownloadOptions(nextComicNumber, true));
         }
+    }
+
+
+    public interface UrlResult {
+        void onOotsUrlResolved(String imageUrl);
+
+        void onOotsUrlError(String reason);
     }
 
     class DownloadOptions {
@@ -88,16 +86,19 @@ public class OotsUrlResolver {
 
         @Override
         protected void onPostExecute(AsyncTaskResult<Pair<DownloadOptions, String>> result) {
-            DownloadOptions options = result.getResult().first;
-            int comicNumber = options.number;
-            if (result.getError() != null) {
-                callback.onOotsUrlError("Can't load page for comic strip: " + comicNumber);
+            if (result.hasError()) {
+                String errMsg = result.getError().getMessage();
+                if (result.getError() instanceof FileNotFoundException) {
+                    errMsg = "Url not found ..." + errMsg.substring(errMsg.length() - 10);
+                }
+                callback.onOotsUrlError(String.format("Can't load page for comic strip (%s).", errMsg));
             } else {
+                DownloadOptions options = result.getResult().first;
                 final Matcher matcher = IMAGE_URL_PATTERN.matcher(result.getResult().second);
                 if (matcher.find()) {
                     String imageName = matcher.group(1);
                     String imageUrl = "http://www.giantitp.com/comics/images/" + imageName;
-                    imageUrlCache.put(comicNumber, imageUrl);
+                    imageUrlCache.put(options.number, imageUrl);
                     if (!options.prefetchOnly) {
                         callback.onOotsUrlResolved(imageUrl);
                     }
